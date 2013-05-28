@@ -1,4 +1,14 @@
 def main():
+
+    # user-specific settings
+    b = Bridge('192.168.1.110')
+    lights_in_play = [
+#                      'Front Porch', 'Entryway', 'Foyer',
+                      'TV', 'Ledge 1', 'Ledge 2', 'Ledge 3', 'Ledge 4', 
+                      'Office', 'Office Lamp 1A', 'Office Lamp 1B', 'Office Lamp 2A', 'Office Lamp 2B', 
+                      'Bedroom 1', 'Bedroom 2'
+                      ]
+
     import sys
     import random as random
     random.seed()
@@ -64,14 +74,6 @@ def main():
 #    print('Color Cycler')
 #    print('Usage: ColorCycle.py <BPM> <hue1 [hue2 ...]>')
     
-    b = Bridge('gravyhole.dyndns.org:4141')
-    lights_in_play = [
-#                      'Front Porch', 'Entryway', 'Foyer',
-                      'TV', 'Ledge 1', 'Ledge 2', 'Ledge 3', 'Ledge 4', 
-                      'Office', 'Office Lamp 1A', 'Office Lamp 1B', 'Office Lamp 2A', 'Office Lamp 2B', 
-                      'Bedroom 1', 'Bedroom 2'
-                      ]
-
     if args.brightnessLivingColors is not None:
         bri_lc = args.brightnessLivingColors # 0 to 254
     else:
