@@ -7,7 +7,8 @@ def main():
     from phue import Bridge
 
     # user-specific settings
-    b = Bridge('192.168.1.110')
+    b = Bridge()
+#    b = Bridge('192.168.1.110') # update to phue allows Bridge() call without IP address after initial setup
     lights_in_play = [
 #                      'Front Porch', 'Entryway', 'Foyer',
                       'TV', 'Ledge 1', 'Ledge 2', 'Ledge 3', 'Ledge 4', 
