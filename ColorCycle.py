@@ -7,8 +7,6 @@ def main():
     from phue import Bridge
 
     # user-specific settings
-    b = Bridge()
-#    b = Bridge('192.168.1.110') # update to phue allows Bridge() call without IP address after initial setup
     lights_in_play = [
 #                      'Front Porch', 'Entryway', 'Foyer',
                       'TV', 'Ledge 1', 'Ledge 2', 'Ledge 3', 'Ledge 4', 
@@ -75,6 +73,7 @@ def main():
 #    print('Color Cycler')
 #    print('Usage: ColorCycle.py <BPM> <hue1 [hue2 ...]>')
     
+    # assign brightness levels
     if args.brightnessLivingColors is not None:
         bri_lc = args.brightnessLivingColors # 0 to 254
     else:
@@ -106,6 +105,9 @@ def main():
                 transitiontime = 0
                 waittime = round(60 / -args.bpm * 10, 0) / 10
 
+    # assign light ID numbers to Hue and LivingCOlors lists (mainly due to brightness differences)
+    b = Bridge()
+#    b = Bridge('192.168.1.110') # update to phue allows Bridge() call without IP address after initial setup
     lights = b.get_light_objects('name')
     light_ids_hue = []
     light_ids_lc = []
@@ -119,7 +121,7 @@ def main():
         else:
             print('else error')
 
-#    print('\'' + name + '\' at ' + str(abs(bpm)) + ' bpm (' + str(waittime) + ' s)')
+    # randomly assign colors to lights and issue the commands via the hub
     while True:
         random.shuffle(light_ids_in_play)
         for light_id in light_ids_in_play:
