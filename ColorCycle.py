@@ -1,5 +1,11 @@
 def main():
 
+    import sys
+    import random as random
+    random.seed()
+    from time import sleep
+    from phue import Bridge
+
     # user-specific settings
     b = Bridge('192.168.1.110')
     lights_in_play = [
@@ -8,12 +14,6 @@ def main():
                       'Office', 'Office Lamp 1A', 'Office Lamp 1B', 'Office Lamp 2A', 'Office Lamp 2B', 
                       'Bedroom 1', 'Bedroom 2'
                       ]
-
-    import sys
-    import random as random
-    random.seed()
-    from time import sleep
-    from phue import Bridge
 
     # command-line argument parser
     import argparse
