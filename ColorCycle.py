@@ -32,10 +32,11 @@ def main():
     # TODO: add option to specify bulb names
     # TODO: add option to specify light IDs
     # TODO: add option to print list of bulb name/ID combos
-    # TODO: add option to print list of 'legal' named colors (green, red)
+    # TODO: add option to print list of 'legal' named colors (green, red, energize)
     # TODO: add option to specify colors as names
     # TODO: add option to turn bulbs on at beginning of cycle
     # TODO: add option to specify bridge IP
+    # TODO: add option to cycle non-randomly through the list
     args = parser.parse_args()
     if args.verbose:
         print('Verbosity set to ON')
