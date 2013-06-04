@@ -1,0 +1,30 @@
+ENERGIZE
+                             'bri': 203,
+                             'colormode': 'ct',
+                             'ct': 155,
+                             'hue': 34495,
+                             'sat': 232,
+                             'xy': [0.3151, 0.3252]},
+
+CONCENTRATE
+                             'bri': 219,
+                             'colormode': 'ct',
+                             'ct': 231,
+                             'hue': 33863,
+                             'sat': 49,
+                             'xy': [0.368, 0.3686]},
+
+READING
+                             'bri': 240,
+                             'colormode': 'ct',
+                             'ct': 343,
+                             'hue': 15331,
+                             'sat': 121,
+                             'xy': [0.4448, 0.4066]},
+RELAX
+                             'bri': 144,
+                             'colormode': 'ct',
+                             'ct': 467,
+                             'hue': 13122,
+                             'sat': 211,
+                             'xy': [0.5119, 0.4147]},
