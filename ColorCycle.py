@@ -37,6 +37,7 @@ def main():
     # TODO: add option to turn bulbs on at beginning of cycle
     # TODO: add option to specify bridge IP
     # TODO: add option to cycle non-randomly through the list
+    # TODO: add option to cycle all lamps in sync through the set of colors
     args = parser.parse_args()
     if args.verbose:
         print('Verbosity set to ON')
