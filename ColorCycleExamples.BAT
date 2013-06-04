@@ -34,3 +34,9 @@ REM Night moves
 c:\python32\python ColorCycle.py -t 30 -bLC 30 -bH 0 0 46920 47883 49955
 REM Set lights low and exit
 c:\python32\python ColorCycle.py 0.0 -bLC 30 -bH 0 0 46920 47883 49955
+
+REM Set phasers to Energize
+c:\python32\python ColorCycle.py 0.0 -bLC 203 -s 232 34495
+
+REM Monochrome night moves
+c:\python32\python ColorCycle.py -m -t 1 -bLC 30 -bH 0 0 46920 47883 49955

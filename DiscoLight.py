@@ -21,7 +21,7 @@ def main():
         print("Incorrect number of input arguments, 2 parameters must be provided.")
         quit()
 
-    b = Bridge('192.168.1.110')
+    b = Bridge()
     light_id = int(b.get_light_id_by_name(name))
 
     # Convert beats per minute (BPM) to tenths of seconds
