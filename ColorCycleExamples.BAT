@@ -7,11 +7,13 @@ REM blue = 46920
 REM purple = 49955
 REM magenta = 60160
 REM red = 65535
-REM white = -1
 REM indigo = 47883
+REM white = -1
+REM black (off) = -2
 
 REM This batch file is not actually intended to be run as a whole.
 REM It's really just a convenient spot for collecting ColorCycle command lines.
+goto end
 
 REM rainbow
 c:\python32\python ColorCycle.py -t 60 0 5632 15104 25500 46920 47883 49955 60160 -1
@@ -40,3 +42,5 @@ c:\python32\python ColorCycle.py 0.0 -bLC 203 -s 232 34495
 
 REM Monochrome night moves
 c:\python32\python ColorCycle.py -m -t 1 -bLC 30 -bH 0 0 46920 47883 49955
+
+:end

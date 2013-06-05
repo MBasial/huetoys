@@ -128,6 +128,7 @@ def main():
     # randomly assign colors to lights and issue the commands via the hub
     if args.monochrome:
         # Set all bulbs to the same color; cycle through colors
+        light_ids_on = []
         while True:
             hue = random.choice(args.hues)
             if hue == -1: # flag for white
@@ -137,16 +138,29 @@ def main():
                 saturation = args.saturation # 0 to 254
 
             if hue == -2: # flag for black (off)
-                # TODO: get light 'on' status and build a list of lights that are on; build fresh every time
+                # get light 'on' status and build a list of lights that are on; build fresh every time
+                for id in light_ids_in_play:
+                    if b.get_light(id, 'on'):
+                        light_ids_on.append(id)
                 command =  {'transitiontime' : transitiontime, 'on' : False}
                 result = b.set_light(light_ids_in_play, command)
             else:
                 # Set LivingColors lamps
-                command_lc =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_lc}
-                result = b.set_light(light_ids_lc, command_lc)
+                light_ids_on_lc = [id for id in light_ids_lc if id in light_ids_on]
+                if len(light_ids_on_lc) > 0:
+                    # If any bulbs are in the list, turn them on
+                    command_lc =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_lc}
+                else: # empty list
+                    command_lc =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_lc}
+                result = b.set_light(light_ids_on_lc, command_lc)
                 # Set Hue bulbs
-                command_hue =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_hue}
-                result = b.set_light(light_ids_hue, command_hue)
+                light_ids_on_hue = [id for id in light_ids_hue if id in light_ids_on]
+                if len(light_ids_on_hue) > 0:
+                    # If any bulbs are in the list, turn them on
+                    command_hue =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_hue}
+                else: # empty list
+                    command_hue =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_hue}
+                result = b.set_light(light_ids_on_hue, command_hue)
 
             if args.verbose:
                 if len(light_ids_lc) > 0:
