@@ -150,17 +150,19 @@ def main():
                 if len(light_ids_on_lc) > 0:
                     # If any bulbs are in the list, turn them on
                     command_lc =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_lc}
+                    result = b.set_light(light_ids_on_lc, command_lc)
                 else: # empty list
                     command_lc =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_lc}
-                result = b.set_light(light_ids_on_lc, command_lc)
+                    result = b.set_light(light_ids_lc, command_lc)
                 # Set Hue bulbs
                 light_ids_on_hue = [id for id in light_ids_hue if id in light_ids_on]
                 if len(light_ids_on_hue) > 0:
                     # If any bulbs are in the list, turn them on
                     command_hue =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_hue}
+                    result = b.set_light(light_ids_on_hue, command_hue)
                 else: # empty list
                     command_hue =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_hue}
-                result = b.set_light(light_ids_on_hue, command_hue)
+                    result = b.set_light(light_ids_hue, command_hue)
 
             if args.verbose:
                 if len(light_ids_lc) > 0:
