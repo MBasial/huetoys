@@ -31,6 +31,7 @@ def main():
     parser.add_argument('-s', '--saturation', help='Set bulb color saturation (0 - 254)', type=int, default=254)
     parser.add_argument('-t', '--timing', help='Use seconds instead of bpm for transition timing', action="store_true", default=False)
     parser.add_argument('-m', '--monochrome', help='Cycle through color list with all lights the same color', action="store_true", default=False)
+    parser.add_argument('-o', '--ordered', help='Cycle through color list in order (do not randomize)', action="store_true", default=False)
     # TODO: add option to specify bulb names
     # TODO: add option to specify light IDs
     # TODO: add option to print list of bulb name/ID combos
@@ -39,7 +40,6 @@ def main():
     # TODO: add option to turn bulbs on at beginning of cycle
     # TODO: add option to specify bridge IP
     # TODO: add option to cycle non-randomly through the list; should be compatible wth -m
-    # TODO: add black (off, flag as hue = -2) as a color; will have to store a list of live bulbs so that lights can turn back on
     args = parser.parse_args()
     if args.verbose:
         print('Verbosity set to ON')
@@ -129,8 +129,14 @@ def main():
     if args.monochrome:
         # Set all bulbs to the same color; cycle through colors
         light_ids_on = []
+        huenum = 0
         while True:
-            hue = random.choice(args.hues)
+            if args.ordered:
+                huenum += 1
+                huenum = huenum % len(args.hues) 
+                hue = args.hues[huenum]
+            else:
+                hue = random.choice(args.hues)
             if hue == -1: # flag for white
                 saturation = 0 # 0 to 254
                 hue = random.choice([i for i in args.hues if i >= 0]) # choose from non-white values
