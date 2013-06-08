@@ -43,4 +43,7 @@ c:\python32\python ColorCycle.py 0.0 -bLC 203 -s 232 34495
 REM Monochrome night moves
 c:\python32\python ColorCycle.py -m -t 1 -bLC 30 -bH 0 0 46920 47883 49955
 
+REM SetBulb example
+c:\python32\python SetBulb.py -v -t 0.0 -b 254 -xy 0.3 0.9
+
 :end
