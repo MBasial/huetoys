@@ -12,10 +12,10 @@ def main():
 #                      'Bedroom 1', 'Bedroom 2'
                       ]
 
-    print('SetBulb')
+    print('SetBulbXY_forPEST')
     # command-line argument parser
     parser = argparse.ArgumentParser(
-            prog = 'SetBulb',
+            prog = 'SetBulbXY_forPEST',
             prefix_chars = '-/',
             description = """This program assigns settings to a list of bulbs (list is currently coded into the .py file).""")
     parser.add_argument('-v', '--verbose', help='Increase output verbosity', action="store_true")
