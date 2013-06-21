@@ -182,6 +182,12 @@ def main():
                 break # end program
             else:
                 sleep(waittime)
+
+            if len(args.hues) == 1:
+                if args.verbose:
+                    print('-- only one color to cycle, exiting program --')
+                # only one color, no reason to keep changing it
+                break
     else:
         # Set bulbs to random colors; wait; repeat
         light_ids_on = []
