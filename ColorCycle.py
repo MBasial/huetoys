@@ -53,7 +53,7 @@ def main():
         elif args.bpm <= 0:
             print('Transitions will be instant')
         print('Hues that will be cycled through: ' + str(args.hues))
-        if len(args.ids) > 0:
+        if args.ids is not None:
             print('Bulbs that will be cycled through: ' + str(args.ids))
         if args.ordered:
             print('Colors and lamps will be cycled in the specified order')
@@ -113,7 +113,7 @@ def main():
         else:
             print('else error')
 
-    if len(args.ids) > 0:
+    if args.ids is not None:
         # Filter lights in use so that only specified bulbs are used.
         # Turn specified bulbs on.
         light_ids_in_play = [id for id in light_ids_in_play if id in args.ids]

@@ -4,10 +4,10 @@ REM orange = 5632
 REM yellow = 15104
 REM green = 25500
 REM blue = 46920
+REM indigo = 47883
 REM purple = 49955
 REM magenta = 60160
 REM red = 65535
-REM indigo = 47883
 REM white = -1
 REM black (off) = -2
 
