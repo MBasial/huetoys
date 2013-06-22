@@ -1,5 +1,4 @@
 def main():
-    import sys
     import random as random
     random.seed()
     from time import sleep
@@ -38,6 +37,7 @@ def main():
     # TODO: add option to print list of bulb name/ID combos
     # TODO: add option to print list of 'legal' named colors (green, red, energize)
     # TODO: add option to specify colors as names
+    # TODO: consider using the data from this page to write color names corresponding to hues: http://en.wikipedia.org/wiki/List_of_colors_(compact)
     # TODO: add option to specify bridge IP
     args = parser.parse_args()
     if args.verbose:
