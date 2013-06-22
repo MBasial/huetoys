@@ -47,4 +47,10 @@ REM SetBulb example
 c:\python32\python SetBulbXY.py -v -t 0.0 -b 254 -xy 0.3 0.9
 c:\python32\python SetBulbXY_forPEST.py -v -t 0.0 -b 153.93 -xy 0.3 0.9
 
+REM ordered rainbow snap
+c:\python32\python ColorCycle.py -100 -o 0 5632 15104 25500 46920 47883 49955 60160 -1
+
+REM quick, ordered rainbow snap with bulbs specified
+c:\python32\python ColorCycle.py -o -t -3  0 5632 15104 25500 46920 47883 49955 60160 -i 10 12 13 14 15
+
 :end

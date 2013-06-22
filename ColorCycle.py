@@ -31,22 +31,21 @@ def main():
     parser.add_argument('-s', '--saturation', help='Set bulb color saturation (0 - 254)', type=int, default=254)
     parser.add_argument('-t', '--timing', help='Use seconds instead of bpm for transition timing', action="store_true", default=False)
     parser.add_argument('-m', '--monochrome', help='Cycle through color list with all lights the same color', action="store_true", default=False)
-    parser.add_argument('-o', '--ordered', help='Cycle through color list in order (do not randomize)', action="store_true", default=False)
+    parser.add_argument('-o', '--ordered', help='Cycle through color list in order (do not randomize); apparent ' +
+                                                'color "chase" order will be in reverse bulb order', action="store_true", default=False)
+    parser.add_argument('-i', '--ids', help='A list of bulb id values to cycle through; bulbs will be turned on', type=int, nargs='+')
     # TODO: add option to specify bulb names
-    # TODO: add option to specify light IDs
     # TODO: add option to print list of bulb name/ID combos
     # TODO: add option to print list of 'legal' named colors (green, red, energize)
     # TODO: add option to specify colors as names
-    # TODO: add option to turn bulbs on at beginning of cycle
     # TODO: add option to specify bridge IP
-    # TODO: add option to cycle non-randomly through the list; should be compatible wth -m
     args = parser.parse_args()
     if args.verbose:
         print('Verbosity set to ON')
         if args.timing:
-            print('Timing is set to ' + str(abs(args.bpm)) + ' seconds.')
+            print('Timing is set to ' + str(abs(args.bpm)) + ' seconds')
         else:
-            print('Timing is set to ' + str(abs(args.bpm)) + ' bpm.')
+            print('Timing is set to ' + str(abs(args.bpm)) + ' bpm')
         if args.bpm == 0:
             print('Lights will be set once and program will exit')
         elif args.bpm >= 0:
@@ -54,6 +53,12 @@ def main():
         elif args.bpm <= 0:
             print('Transitions will be instant')
         print('Hues that will be cycled through: ' + str(args.hues))
+        if len(args.ids) > 0:
+            print('Bulbs that will be cycled through: ' + str(args.ids))
+        if args.ordered:
+            print('Colors and lamps will be cycled in the specified order')
+        else:
+            print('Colors and lamps will be cycled in random order')
         print('Color saturation set to ' + str(args.saturation))
         print('Brightness set to ' + str(args.brightness))
         if args.brightnessLivingColors is not None:
@@ -61,22 +66,6 @@ def main():
         if args.brightnessHue is not None:
             print('Brightness for Hue bulbs set to ' + str(args.brightnessHue))
 
-# Old manual command-line argument parsing; retained for reference
-#    # Get cycling parameters.
-#    if len(sys.argv) >= 3: # The name of the python script is always the first argument, so that plus 2 parameters = 3.
-#        bpm = float(sys.argv[1])
-#        hues = [int(h) for h in sys.argv[2:]]
-#    elif len(sys.argv) == 1: # Use interactive input.
-##        lights = b.get_light_objects('name')
-#        bpm = float(input("BPM (can be decimal; negative for snap transitions): "))
-#        hues = input("List of hue values (0 - 65535): ")
-#        hues = [int(h) for h in hues.split()]
-#    else:
-#        print("Incorrect number of input arguments, 2 parameters must be provided.")
-#        quit()
-#    print('Color Cycler')
-#    print('Usage: ColorCycle.py <BPM> <hue1 [hue2 ...]>')
-    
     # assign brightness levels
     if args.brightnessLivingColors is not None:
         bri_lc = args.brightnessLivingColors # 0 to 254
@@ -88,7 +77,7 @@ def main():
         bri_hue = args.brightness
 
     # Convert beats per minute (BPM) to tenths of seconds
-    if args.timing == 0.0:
+    if args.bpm == 0.0:
         transitiontime = 0
         waittime = 0.0
     else:
@@ -111,7 +100,6 @@ def main():
 
     # assign light ID numbers to Hue and LivingColors lists (mainly due to brightness differences)
     b = Bridge()
-#    b = Bridge('192.168.1.110') # update to phue allows Bridge() call without IP address after initial setup
     lights = b.get_light_objects('name')
     light_ids_hue = []
     light_ids_lc = []
@@ -125,11 +113,19 @@ def main():
         else:
             print('else error')
 
+    if len(args.ids) > 0:
+        # Filter lights in use so that only specified bulbs are used.
+        # Turn specified bulbs on.
+        light_ids_in_play = [id for id in light_ids_in_play if id in args.ids]
+        light_ids_lc = [id for id in light_ids_lc if id in args.ids]
+        light_ids_hue = [id for id in light_ids_hue if id in args.ids]
+        b.set_light(light_ids_in_play, 'on', True)
+
     # randomly assign colors to lights and issue the commands via the hub
     if args.monochrome:
         # Set all bulbs to the same color; cycle through colors
         light_ids_on = []
-        huenum = 0
+        huenum = -1
         while True:
             if args.ordered:
                 huenum += 1
@@ -191,18 +187,30 @@ def main():
     else:
         # Set bulbs to random colors; wait; repeat
         light_ids_on = []
+        huenum = -1
         while True:
-            random.shuffle(light_ids_in_play)
             saturation = args.saturation # 0 to 254
-            for light_id in light_ids_in_play:
-                hue = random.choice(args.hues)
+            if not args.ordered:
+                random.shuffle(light_ids_in_play)
+            else:
+                huenum += 1
+                huenum = huenum % len(args.hues)
+            for light_index, light_id in enumerate(light_ids_in_play):
+                if args.ordered:
+                    # Each bulb is assigned hues in the user-specified order.
+                    # The intial hue is set by cycling through the color list in order.
+                    # Visual note: the apparent "chase" direction of colors is the reverse 
+                    # of the order of lights. 
+                    hue = args.hues[(light_index + huenum) % len(args.hues)]
+                else:
+                    hue = random.choice(args.hues)
                 hue_verbose = hue # used only for verbose printing
                 if hue == -1: # flag for white
                     saturation = 0 # 0 to 254
-                    hue = random.choice([i for i in args.hues if i >= 0]) # choose from non-white values
+                    hue = random.choice([i for i in args.hues if i >= 0]) # choose from non-white/black values
                 elif hue == -2: # flag for black
                     light_ids_on.append(light_id)
-                    hue = random.choice([i for i in args.hues if i >= 0]) # choose from non-white values
+                    hue = random.choice([i for i in args.hues if i >= 0]) # choose from non-white/black values
                     #command =  {'on' : False, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_lc}
                     command =  {'on' : False, 'transitiontime' : transitiontime}
 
@@ -224,6 +232,7 @@ def main():
                     else:
                         print('else error')
                 result = b.set_light(light_id, command)
+                saturation = args.saturation # 0 to 254
 
                 if args.verbose:
                     if light_id in light_ids_lc:
