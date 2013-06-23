@@ -33,6 +33,7 @@ def main():
     parser.add_argument('-o', '--ordered', help='Cycle through color list in order (do not randomize); apparent ' +
                                                 'color "chase" order will be in reverse bulb order', action="store_true", default=False)
     parser.add_argument('-i', '--ids', help='A list of bulb id values to cycle through; bulbs will be turned on', type=int, nargs='+')
+    parser.add_argument('-w', '--wait', help='Set wait time separately from trasition time; is modified by -t', type=float, default = 0.0)
     # TODO: add option to specify bulb names
     # TODO: add option to print list of bulb name/ID combos
     # TODO: add option to print list of 'legal' named colors (green, red, energize)
@@ -43,9 +44,11 @@ def main():
     if args.verbose:
         print('Verbosity set to ON')
         if args.timing:
-            print('Timing is set to ' + str(abs(args.bpm)) + ' seconds')
+            print('Transition timing is set to ' + str(abs(args.bpm)) + ' seconds with a wait time of ' + str(abs(args.wait)) + ' seconds')
         else:
-            print('Timing is set to ' + str(abs(args.bpm)) + ' bpm')
+            net_time = 60 / (60 / abs(args.bpm)+ 60 / abs(args.wait)) # convert from bpm to seconds, sum, convert to bpm
+            print('Timing is set to ' + str(abs(args.bpm)) + ' bpm with a wait time of ' + str(abs(args.wait)) + 
+                  ' bpm; net timing = ' + str(net_time) + ' bpm')
         if args.bpm == 0:
             print('Lights will be set once and program will exit')
         elif args.bpm >= 0:
@@ -77,26 +80,27 @@ def main():
         bri_hue = args.brightness
 
     # Convert beats per minute (BPM) to tenths of seconds
-    if args.bpm == 0.0:
-        transitiontime = 0
-        waittime = 0.0
+    if args.timing:
+        # Use bpm argument as seconds, NOT as bpm
+        if args.bpm >= 0: 
+            transitiontime = int(args.bpm * 10)
+            waittime = 0.0
+        else: # use negative timing (in seconds) to specify flash transitions
+            transitiontime = 0
+            waittime = -args.bpm
     else:
-        if args.timing:
-            # Use bpm argument as seconds, NOT as bpm
-            if args.bpm >= 0: 
-                transitiontime = int(args.bpm * 10)
-                waittime = transitiontime / 10
-            else: # use negative bpm to specify flash transitions
-                transitiontime = 0
-                waittime = -args.bpm
-        else:
-            # Use bpm as bpm
-            if args.bpm >= 0: 
-                transitiontime = int(round(60 / args.bpm * 10, 0))
-                waittime = transitiontime / 10
-            else: # use negative bpm to specify flash transitions
-                transitiontime = 0
-                waittime = round(60 / -args.bpm * 10, 0) / 10
+        # Use bpm as bpm
+        if args.bpm >= 0: 
+            transitiontime = int(round(60 / args.bpm * 10, 0))
+            waittime = 0.0
+        else: # use negative bpm to specify flash transitions
+            transitiontime = 0
+            waittime = 60 / -args.bpm
+    if args.wait > 0.0: # if wait is specified, overwrite default calculation from args.bpm
+        if args.timing: # wait is in seconds
+            waittime = args.wait
+        else: # wait is in bpm
+            waittime = 60 / args.wait
 
     # assign light ID numbers to Hue and LivingColors lists (mainly due to brightness differences)
     b = Bridge()
@@ -133,6 +137,8 @@ def main():
                 hue = args.hues[huenum]
             else:
                 hue = random.choice(args.hues)
+
+            hue_verbose = hue # used only for verbose printing
             if hue == -1: # flag for white
                 saturation = 0 # 0 to 254
                 hue = random.choice([i for i in args.hues if i >= 0]) # choose from non-white values
@@ -168,16 +174,18 @@ def main():
 
             if args.verbose:
                 if len(light_ids_lc) > 0:
-                    print('LC  Bulb(s) ' + str(light_ids_lc) + ' set to hue = ' + str(hue) + ', sat = ' + str(saturation) + ', bri = ' + str(bri_lc))
+#                    print('LC  Bulb(s) ' + str(light_ids_lc) + ' set to hue = ' + str(hue) + ', sat = ' + str(saturation) + ', bri = ' + str(bri_lc))
+                    print('LC Bulb(s) {light_id} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri_lc:>3}'.format(light_id=light_ids_lc, hue=hue_verbose, sat=saturation, bri_lc=bri_lc))
                 if len(light_ids_hue) > 0:
-                    print('Hue Bulb(s) ' + str(light_ids_hue) + ' set to hue = ' + str(hue) + ', sat = ' + str(saturation) + ', bri = ' + str(bri_hue))
-                print('-- pass complete, waiting ' + str(waittime) + ' seconds --')
-            if waittime == 0.0:
+#                    print('Hue Bulb(s) ' + str(light_ids_hue) + ' set to hue = ' + str(hue) + ', sat = ' + str(saturation) + ', bri = ' + str(bri_hue))
+                    print('Hue Bulb(s) {light_id} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri_lc:>3}'.format(light_id=light_ids_hue, hue=hue_verbose, sat=saturation, bri_lc=bri_lc))
+                print('-- pass complete, waiting ' + str(transitiontime / 10 + waittime) + ' seconds --')
+            if transitiontime + waittime == 0.0:
                 if args.verbose:
                     print('-- lights set, bpm = 0.0, exiting program --')
                 break # end program
             else:
-                sleep(waittime)
+                sleep(transitiontime / 10 + waittime)
 
             if len(args.hues) == 1:
                 if args.verbose:
@@ -211,7 +219,6 @@ def main():
                 elif hue == -2: # flag for black
                     light_ids_on.append(light_id)
                     hue = random.choice([i for i in args.hues if i >= 0]) # choose from non-white/black values
-                    #command =  {'on' : False, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_lc}
                     command =  {'on' : False, 'transitiontime' : transitiontime}
 
                 if hue_verbose != -2: # if not black
@@ -232,23 +239,23 @@ def main():
                     else:
                         print('else error')
                 result = b.set_light(light_id, command)
-                saturation = args.saturation # 0 to 254
 
                 if args.verbose:
                     if light_id in light_ids_lc:
-                        #print('Bulb ' + str(light_id) + ' set to hue = ' + str(hue_verbose) + ', sat = ' + str(saturation) + ', bri = ' + str(bri_lc))
                         print('Bulb {light_id:>2} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri_lc:>3}'.format(light_id=light_id, hue=hue_verbose, sat=saturation, bri_lc=bri_lc))
                     elif light_id in light_ids_hue:
-                        #print('Bulb ' + str(light_id) + ' set to hue = ' + str(hue_verbose) + ', sat = ' + str(saturation) + ', bri = ' + str(bri_hue))
                         print('Bulb {light_id:>2} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri_hue:>3}'.format(light_id=light_id, hue=hue_verbose, sat=saturation, bri_hue=bri_hue))
+
+                saturation = args.saturation # 0 to 254
+
             if args.verbose:
-                print('-- pass complete, waiting ' + str(waittime) + ' seconds --')
-            if waittime == 0.0:
+                print('-- pass complete, waiting ' + str(transitiontime / 10 + waittime) + ' seconds --')
+            if transitiontime + waittime == 0.0:
                 if args.verbose:
                     print('-- lights set, bpm = 0.0, exiting program --')
                 break # end program
             else:
-                sleep(waittime)
+                sleep(transitiontime / 10 + waittime)
 
     # debug
 #    import pdb
