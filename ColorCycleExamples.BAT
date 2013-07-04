@@ -12,7 +12,7 @@ REM white = -1
 REM black (off) = -2
 
 REM This batch file is not actually intended to be run as a whole.
-REM It's really just a convenient spot for collecting ColorCycle command lines.
+REM It is really just a convenient spot for collecting ColorCycle command lines.
 goto end
 
 REM rainbow
@@ -25,15 +25,19 @@ c:\python32\python ColorCycle.py -50 0 25500 46920
 
 REM St. Paddy's Day
 c:\python32\python ColorCycle.py -t 20 25500 -1 5632
-REM 'Murrica
+
+REM 'Murrica [bright, dim]
 c:\python32\python ColorCycle.py -t 20 0 -1 46920
+c:\python32\python ColorCycle.py -v -o -t 7 -w 233 -bLC 30 -bH 0  0 -1 46920
+
 REM Christmas
 c:\python32\python ColorCycle.py -t 20 0 -1 25500
 REM Easter
 c:\python32\python ColorCycle.py -t 60 -s 175 0 5632 15104 25500 46920 47883 49955 60160 -1
 
 REM Night moves
-c:\python32\python ColorCycle.py -t 30 -bLC 30 -bH 0 0 46920 47883 49955
+c:\python32\python ColorCycle.py -v -t 60 -w 120 -bLC 30 -bH 0  0 46920 47883 49955
+
 REM Set lights low and exit
 c:\python32\python ColorCycle.py 0.0 -bLC 30 -bH 0 0 46920 47883 49955
 
