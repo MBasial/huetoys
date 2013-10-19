@@ -6,7 +6,7 @@ def main():
 
     # user-specific settings
     lights_in_play = [
-                      'Front Porch', 
+#                      'Front Porch', 
                       'Entryway', 'Foyer',
                       'Kitchen 1', 'Kitchen 2',
                       'TV', 'Ledge 1', 'Ledge 2', 'Ledge 3', 'Ledge 4',
@@ -36,6 +36,9 @@ def main():
     parser.add_argument('-w', '--wait', help='Set wait time separately from transition time (bpm or seconds)', type=float, default = 0.0)
     parser.add_argument('-c', '--hues', '--colors', help='A list of color values the lights will cycle through (0 - 65535)', type=int, nargs='+', default = [-1])
     parser.add_argument('-b', '--brightness', help='Set bulb brightness (0 - 254)', type=int, default=254)
+    parser.add_argument('-bH', '--brightnessHue', help='Set Hue bulb brightness (0 - 254)', type=int, metavar='briHue')
+    parser.add_argument('-bLC', '--brightnessLivingColors', help='Set LivingColors bulb brightness (0 - 254)', type=int, metavar='briLC')
+    parser.add_argument('-bLS', '--brightnessLightStrips', help='Set LightStrips brightness (0 - 254)', type=int, metavar='briLS')
     parser.add_argument('-s', '--saturation', help='Set bulb color saturation (0 - 254)', type=int, default=254)
     parser.add_argument('-m', '--monochrome', help='Cycle through color list with all lights the same color', action="store_true", default=False)
     parser.add_argument('-o', '--ordered', help='Cycle through color list in order (do not randomize); apparent ' +
@@ -52,8 +55,6 @@ def main():
     # TODO: add option to specify bridge IP
     # TODO: design a GUI with checkboxes, etc. for options
     # TODO: add option to specify colors (and more?) as ranges, e.g. hues = [0-1000, 5000-6800, 40000-41000] would assign three colors chosen from those ranges
-    # TODO: add a sleep timer, e.g. run random colors for 1 hour, then turn lights off 
-    # TODO: add an option that increases hue/brightness/etc. by an increment of X for each time Y -- this is a maybe
     
     args = parser.parse_args()
     if args.verbose:
@@ -91,8 +92,24 @@ def main():
             print('Colors and lamps will be cycled in random order')
         print('Color saturation set to ' + str(args.saturation))
         print('Brightness set to ' + str(args.brightness))
-    
-    bri = args.brightness
+        if args.brightnessLivingColors is not None:
+            print('Brightness for LivingColors lamps set to ' + str(args.brightnessLivingColors))
+        if args.brightnessHue is not None:
+            print('Brightness for Hue bulbs set to ' + str(args.brightnessHue))
+
+    # assign brightness levels
+    if args.brightnessHue is not None:
+        bri_hue = args.brightnessHue # 0 to 254
+    else:
+        bri_hue = args.brightness
+    if args.brightnessLivingColors is not None:
+        bri_lc = args.brightnessLivingColors # 0 to 254
+    else:
+        bri_lc = args.brightness
+    if args.brightnessLightStrips is not None:
+        bri_ls = args.brightnessLightStrips # 0 to 254
+    else:
+        bri_ls = args.brightness
 
     # Convert timing/frequency to integer tenths of seconds (transitiontime).
     # Wait times are handled by sleep(), so wait time is in actual seconds.
@@ -126,14 +143,28 @@ def main():
     # assign light ID numbers to Hue and LivingColors lists (mainly due to brightness differences)
     b = Bridge()
     lights = b.get_light_objects('name')
+    light_ids_hue = []
+    light_ids_lc = []
+    light_ids_ls = []
     light_ids_in_play = []
     for name in lights_in_play:
         light_ids_in_play.append(int(b.get_light_id_by_name(name)))
+        if b.get_light(int(b.get_light_id_by_name(name)))['modelid'] == 'LCT001': # Hue
+             light_ids_hue.append(int(b.get_light_id_by_name(name)))
+        elif b.get_light(int(b.get_light_id_by_name(name)))['modelid'] == 'LLC001': # LivingColors
+             light_ids_lc.append(int(b.get_light_id_by_name(name)))
+        elif b.get_light(int(b.get_light_id_by_name(name)))['modelid'] == 'LST001': # LightStrips
+             light_ids_ls.append(int(b.get_light_id_by_name(name)))
+        else:
+            print('else error')
 
     if args.ids is not None:
         # Filter lights in use so that only specified bulbs are used.
         # Turn specified bulbs on.
         light_ids_in_play = [id for id in light_ids_in_play if id in args.ids]
+        light_ids_hue = [id for id in light_ids_hue if id in args.ids]
+        light_ids_lc = [id for id in light_ids_lc if id in args.ids]
+        light_ids_ls = [id for id in light_ids_ls if id in args.ids]
         b.set_light(light_ids_in_play, 'on', True)
 
     # randomly assign colors to lights and issue the commands via the hub
@@ -164,20 +195,44 @@ def main():
                 command =  {'transitiontime' : transitiontime, 'on' : False}
                 result = b.set_light(light_ids_in_play, command)
             else:
-                # Set bulbs
-                light_ids_on = [id for id in light_ids_hue if id in light_ids_on]
-                if len(light_ids_on) > 0:
+                # Set Hue bulbs
+                light_ids_on_hue = [id for id in light_ids_hue if id in light_ids_on]
+                if len(light_ids_on_hue) > 0:
                     # If any bulbs are in the list, turn them on
-                    command =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri}
-                    result = b.set_light(light_ids_on, command)
+                    command_hue =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_hue}
+                    result = b.set_light(light_ids_on_hue, command_hue)
                 else: # empty list
-                    command =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri}
-                    result = b.set_light(light_ids_in_play, command)
+                    command_hue =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_hue}
+                    result = b.set_light(light_ids_hue, command_hue)
+                # Set LivingColors lamps
+                light_ids_on_lc = [id for id in light_ids_lc if id in light_ids_on]
+                if len(light_ids_on_lc) > 0:
+                    # If any bulbs are in the list, turn them on
+                    command_lc =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_lc}
+                    result = b.set_light(light_ids_on_lc, command_lc)
+                else: # empty list
+                    command_lc =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_lc}
+                    result = b.set_light(light_ids_lc, command_lc)
+                # Set LightStrips
+                light_ids_on_ls = [id for id in light_ids_ls if id in light_ids_on]
+                if len(light_ids_on_ls) > 0:
+                    # If any bulbs are in the list, turn them on
+                    command_ls =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_ls}
+                    result = b.set_light(light_ids_on_ls, command_ls)
+                else: # empty list
+                    command_ls =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_ls}
+                    result = b.set_light(light_ids_ls, command_ls)
 
             if args.verbose:
-                if len(light_ids_in_play) > 0:
-#                    print('Hue Bulb(s) ' + str(light_ids_in_play) + ' set to hue = ' + str(hue) + ', sat = ' + str(saturation) + ', bri = ' + str(bri))
-                    print('Bulb(s) {light_id} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri:>3}'.format(light_id=light_ids_in_play, hue=hue_verbose, sat=saturation, bri=bri))
+                if len(light_ids_hue) > 0:
+#                    print('Hue Bulb(s) ' + str(light_ids_hue) + ' set to hue = ' + str(hue) + ', sat = ' + str(saturation) + ', bri = ' + str(bri_hue))
+                    print('Hue Bulb(s) {light_id} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri_lc:>3}'.format(light_id=light_ids_hue, hue=hue_verbose, sat=saturation, bri_lc=bri_hue))
+                if len(light_ids_lc) > 0:
+#                    print('LC  Bulb(s) ' + str(light_ids_lc) + ' set to hue = ' + str(hue) + ', sat = ' + str(saturation) + ', bri = ' + str(bri_lc))
+                    print('LC Bulb(s) {light_id} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri_lc:>3}'.format(light_id=light_ids_lc, hue=hue_verbose, sat=saturation, bri_lc=bri_lc))
+                if len(light_ids_ls) > 0:
+#                    print('LightStrip(s) ' + str(light_ids_ls) + ' set to hue = ' + str(hue) + ', sat = ' + str(saturation) + ', bri = ' + str(bri_ls))
+                    print('LightStrip(s) {light_id} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri_ls:>3}'.format(light_id=light_ids_ls, hue=hue_verbose, sat=saturation, bri_ls=bri_ls))
                 print('-- pass complete, waiting ' + str(transitiontime / 10 + waittime) + ' seconds --')
             if transitiontime + waittime == 0.0:
                 if args.verbose:
@@ -224,17 +279,38 @@ def main():
                     command =  {'on' : False, 'transitiontime' : transitiontime}
 
                 if hue_verbose != -2: # if not black
-                    # Set bulbs
-                    if light_id in light_ids_on:
-                        command =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri}
-                        light_ids_on.remove(light_id)
+                    if light_id in light_ids_hue:
+                        # Set Hue bulbs
+                        if light_id in light_ids_on:
+                            command =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_hue}
+                            light_ids_on.remove(light_id)
+                        else:
+                            command =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_hue}
+                    elif light_id in light_ids_lc:
+                        # Set LivingColors lamps
+                        if light_id in light_ids_on:
+                            command =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_lc}
+                            light_ids_on.remove(light_id)
+                        else:
+                            command =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_lc}
+                    elif light_id in light_ids_ls:
+                        # Set LightStrips
+                        if light_id in light_ids_on:
+                            command =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_ls}
+                            light_ids_on.remove(light_id)
+                        else:
+                            command =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri_ls}
                     else:
-                        command =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri}
+                        print('else error')
                 result = b.set_light(light_id, command)
 
                 if args.verbose:
-                    if light_id in light_ids_in_play:
-                        print('Bulb {light_id:>2} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri:>3}'.format(light_id=light_id, hue=hue_verbose, sat=saturation, bri=bri))
+                    if light_id in light_ids_hue:
+                        print('Bulb {light_id:>2} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri_hue:>3}'.format(light_id=light_id, hue=hue_verbose, sat=saturation, bri_hue=bri_hue))
+                    elif light_id in light_ids_lc:
+                        print('Bulb {light_id:>2} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri_lc:>3}'.format(light_id=light_id, hue=hue_verbose, sat=saturation, bri_lc=bri_lc))
+                    elif light_id in light_ids_ls:
+                        print('Bulb {light_id:>2} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri_ls:>3}'.format(light_id=light_id, hue=hue_verbose, sat=saturation, bri_ls=bri_ls))
 
                 saturation = args.saturation # 0 to 254
 

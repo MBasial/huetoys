@@ -11,6 +11,12 @@ REM red = 65535
 REM white = -1
 REM black (off) = -2
 
+REM Office = 10 12 15 19
+REM Bedroom = 6 7 13 14 16 18
+REM Living Room and Entryway = 1 2 3 4 8 9 11
+REM Tina`s Room = 17
+REM Everything Except Front Porch = 6 7 13 14 16 18  10 12 15 19  1 2 3 4 8 9 11  17  20 21
+
 REM This batch file is not actually intended to be run as a whole.
 REM It is really just a convenient spot for collecting ColorCycle command lines.
 goto end
@@ -23,10 +29,10 @@ c:\python32\python ColorCycle.py -100 0 5632 15104 25500 46920 47883 49955 60160
 REM RGB
 c:\python32\python ColorCycle.py -50 0 25500 46920
 
-REM St. Paddy's Day
+REM St. Paddy`s Day
 c:\python32\python ColorCycle.py -t 20 25500 -1 5632
 
-REM 'Murrica [bright, dim]
+REM `Murrica [bright, dim]
 c:\python32\python ColorCycle.py -t 20 0 -1 46920
 c:\python32\python ColorCycle.py -v -o -t 7 -w 233 -bLC 30 -bH 0  0 -1 46920
 
@@ -36,7 +42,13 @@ REM Easter
 c:\python32\python ColorCycle.py -t 60 -s 175 0 5632 15104 25500 46920 47883 49955 60160 -1
 
 REM Night moves
-c:\python32\python ColorCycle.py -v -t 60 -w 120 -bLC 30 -bH 0  0 46920 47883 49955
+c:\python32\python ColorCycle.py -v -t 20 -w 160 -bLC 30 -bH 0 -bLS 0  0 46920 47883 49955
+title Office mono
+c:\python32\python ColorCycle.py -v -t 20 -w 160 -b 30 -m 0 46920 47883 49955 -i 10 12 15 19
+title Bedroom mono
+c:\python32\python ColorCycle.py -v -t 20 -w 160 -b 30 -m 0 46920 47883 49955 -i 6 7 13 14 16 18
+title House Interior mono
+c:\python32\python ColorCycle.py -v -t 20 -w 160 -b 30 -m 0 46920 47883 49955 -i 6 7 13 14 16 18  10 12 15 19  1 2 3 4 8 9 11  17  20 21
 
 REM Set lights low and exit
 c:\python32\python ColorCycle.py 0.0 -bLC 30 -bH 0 0 46920 47883 49955
@@ -56,5 +68,10 @@ c:\python32\python ColorCycle.py -100 -o 0 5632 15104 25500 46920 47883 49955 60
 
 REM quick, ordered rainbow snap with bulbs specified
 c:\python32\python ColorCycle.py -o -t -3  0 5632 15104 25500 46920 47883 49955 60160 -i 10 12 13 14 15
+
+REM NEW STYLE
+c:\python32\python ColorCycle.py -v -t 120 -c 0 5632 -m -o -b 30 -i 6 7 13 14 16 18  10 12 15 19  1 2 3 4 8 9 11  17  20 21
+title Random Night Colors
+c:\python32\python ColorCycle.py -v -t 3 -w 120 -b 1 -c 0 5632 49955 60160 -i 6 7 13 14 16 18  10 12 15 19  1 2 3 4 8 9 11  17  20 21
 
 :end
