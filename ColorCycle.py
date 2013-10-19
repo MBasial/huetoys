@@ -2,6 +2,7 @@ def main():
     import random as random
     random.seed()
     from time import sleep
+    from time import clock
     from phue import Bridge
 
     # user-specific settings
@@ -41,6 +42,7 @@ def main():
     parser.add_argument('-o', '--ordered', help='Cycle through color list in order (do not randomize); apparent ' +
                                                 'color "chase" order will be in reverse bulb order', action="store_true", default=False)
     parser.add_argument('-i', '--ids', help='A list of bulb id values to cycle through; bulbs will be turned on', type=int, nargs='+')
+    parser.add_argument('-d', '--duration', help='Duration for which the pattern should repeat (minutes)', type=float) #, default = 0.0)
     parser.add_argument('-v', '--verbose', help='Increase output verbosity', action="store_true")
     # TODO: add option to specify bulb names
     # TODO: add option to specify lights by name wildcard, e.g. 'Office*' or 'Office' implying '*Office*' or '*office*'
@@ -52,7 +54,6 @@ def main():
     # TODO: add option to specify bridge IP
     # TODO: design a GUI with checkboxes, etc. for options
     # TODO: add option to specify colors (and more?) as ranges, e.g. hues = [0-1000, 5000-6800, 40000-41000] would assign three colors chosen from those ranges
-    # TODO: add a sleep timer, e.g. run random colors for 1 hour, then turn lights off 
     # TODO: add an option that increases hue/brightness/etc. by an increment of X for each time Y -- this is a maybe
     # TODO: set up a series of testing comand lines (e.g. 0, 1, 5 bulbs, 0, 1, 5 colors, bad parameter values)
     
@@ -92,6 +93,8 @@ def main():
             print('Colors and lamps will be cycled in random order')
         print('Color saturation set to ' + str(args.saturation))
         print('Brightness set to ' + str(args.brightness))
+        if args.duration is not None:
+            print('Pattern will be repeated for ' + str(args.duration) + ' minute(s)')
     
     bri = args.brightness
 
@@ -142,7 +145,11 @@ def main():
         # Set all bulbs to the same color; cycle through colors
         light_ids_on = []
         huenum = -1
+        start = clock()
         while True:
+            if args.duration is not None:
+                if args.duration < (clock() - start) / 60:
+                        break
             if args.ordered:
                 huenum += 1
                 huenum = huenum % len(args.hues) 
@@ -180,6 +187,8 @@ def main():
 #                    print('Hue Bulb(s) ' + str(light_ids_in_play) + ' set to hue = ' + str(hue) + ', sat = ' + str(saturation) + ', bri = ' + str(bri))
                     print('Bulb(s) {light_id} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri:>3}'.format(light_id=light_ids_in_play, hue=hue_verbose, sat=saturation, bri=bri))
                 print('-- pass complete, waiting ' + str(transitiontime / 10 + waittime) + ' seconds --')
+                if args.duration is not None:
+                    print('-- ' + str(round(args.duration - clock()/60, 3)) + ' minutes remaining --')
             if transitiontime + waittime == 0.0:
                 if args.verbose:
                     print('-- lights set, bpm = 0.0, exiting program --')
@@ -196,7 +205,11 @@ def main():
         # Set bulbs to random colors; wait; repeat
         light_ids_on = []
         huenum = -1
+        start = clock()
         while True:
+            if args.duration is not None:
+                if args.duration < (clock() - start) / 60:
+                        break
             saturation = args.saturation # 0 to 254
             if not args.ordered:
                 random.shuffle(light_ids_in_play)
@@ -241,6 +254,8 @@ def main():
 
             if args.verbose:
                 print('-- pass complete, waiting ' + str(transitiontime / 10 + waittime) + ' seconds --')
+                if args.duration is not None:
+                    print('-- ' + str(round(args.duration - clock()/60, 3)) + ' minutes remaining --')
             if transitiontime + waittime == 0.0:
                 if args.verbose:
                     print('-- lights set, bpm = 0.0, exiting program --')
