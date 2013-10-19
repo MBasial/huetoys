@@ -165,7 +165,7 @@ def main():
                 result = b.set_light(light_ids_in_play, command)
             else:
                 # Set bulbs
-                light_ids_on = [id for id in light_ids_hue if id in light_ids_on]
+                light_ids_on = [id for id in light_ids if id in light_ids_on]
                 if len(light_ids_on) > 0:
                     # If any bulbs are in the list, turn them on
                     command =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri}
