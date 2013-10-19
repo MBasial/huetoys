@@ -54,6 +54,7 @@ def main():
     # TODO: add option to specify colors (and more?) as ranges, e.g. hues = [0-1000, 5000-6800, 40000-41000] would assign three colors chosen from those ranges
     # TODO: add a sleep timer, e.g. run random colors for 1 hour, then turn lights off 
     # TODO: add an option that increases hue/brightness/etc. by an increment of X for each time Y -- this is a maybe
+    # TODO: set up a series of testing comand lines (e.g. 0, 1, 5 bulbs, 0, 1, 5 colors, bad parameter values)
     
     args = parser.parse_args()
     if args.verbose:
