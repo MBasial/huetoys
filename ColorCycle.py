@@ -34,10 +34,10 @@ def main():
                                                'negative values produce flash transitions', type=float)
     timinggroup.add_argument('-r', '--bpm', '--rate', help='Set tempo as beats per minute, decimal values allowed; positive values produce gradual changes, ' + 
                                             'negative values produce flash transitions', type=float)
-    parser.add_argument('-w', '--wait', help='Set wait time separately from transition time (bpm or seconds)', type=float, default = 0.0)
-    parser.add_argument('-c', '--hues', '--colors', help='A list of color values the lights will cycle through (0 - 65535)', type=int, nargs='+', default = [-1])
-    parser.add_argument('-b', '--brightness', help='Set bulb brightness (0 - 254)', type=int, default=254)
-    parser.add_argument('-s', '--saturation', help='Set bulb color saturation (0 - 254)', type=int, default=254)
+    parser.add_argument('-w', '--wait', help='Set wait time separately from transition time (bpm or seconds)', type=float, default=0.0)
+    parser.add_argument('-c', '--hues', '--colors', help='A list of color values the lights will cycle through (0 - 65535)', type=int, nargs='+', default=[-1])
+    parser.add_argument('-b', '--brightness', help='Set bulb brightness (0 - 254, can be a list)', type=int, nargs='+', default=[254])
+    parser.add_argument('-s', '--saturation', help='Set bulb color saturation (0 - 254)', type=int, nargs='+', default=[254])
     parser.add_argument('-m', '--monochrome', help='Cycle through color list with all lights the same color', action="store_true", default=False)
     parser.add_argument('-o', '--ordered', help='Cycle through color list in order (do not randomize); apparent ' +
                                                 'color "chase" order will be in reverse bulb order', action="store_true", default=False)
@@ -91,13 +91,11 @@ def main():
             print('Colors and lamps will be cycled in the specified order')
         else:
             print('Colors and lamps will be cycled in random order')
-        print('Color saturation set to ' + str(args.saturation))
-        print('Brightness set to ' + str(args.brightness))
+        print('Color saturation set to: ' + str(args.saturation))
+        print('Brightness set to: ' + str(args.brightness))
         if args.duration is not None:
             print('Pattern will be repeated for ' + str(args.duration) + ' minute(s)')
     
-    bri = args.brightness
-
     # Convert timing/frequency to integer tenths of seconds (transitiontime).
     # Wait times are handled by sleep(), so wait time is in actual seconds.
     if args.timing is not None:
@@ -145,24 +143,32 @@ def main():
         # Set all bulbs to the same color; cycle through colors
         light_ids_on = []
         huenum = -1
+        brinum = -1
+        satnum = -1
         start = clock()
         while True:
             if args.duration is not None:
                 if args.duration < (clock() - start) / 60:
                         break
             if args.ordered:
-                huenum += 1
-                huenum = huenum % len(args.hues) 
+                # This results in each bulb moving through the parameter list in order.
+                huenum = (huenum + 1) % len(args.hues)
+                brinum = (brinum + 1) % len(args.brightness)
+                satnum = (satnum + 1) % len(args.saturation)
                 hue = args.hues[huenum]
+                bri = args.brightness[brinum]
+                sat = args.saturation[satnum]
             else:
                 hue = random.choice(args.hues)
+                bri = random.choice(args.brightness)
+                sat = random.choice(args.saturation)
 
             hue_verbose = hue # used only for verbose printing
             if hue == -1: # flag for white
-                saturation = 0 # 0 to 254
+                sat = 0 # 0 to 254
                 hue = random.choice([i for i in args.hues if i >= 0]) # choose from non-white values
-            else:
-                saturation = args.saturation # 0 to 254
+#            else:
+#                sat = random.choice(args.saturation) # 0 to 254
 
             if hue == -2: # flag for black (off)
                 # get light 'on' status and build a list of lights that are on; build fresh every time
@@ -173,19 +179,18 @@ def main():
                 result = b.set_light(light_ids_in_play, command)
             else:
                 # Set bulbs
-#                light_ids_on = [id for id in light_ids_hue if id in light_ids_on]
                 if len(light_ids_on) > 0:
                     # If any bulbs are in the list, turn them on
-                    command =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri}
+                    command =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : sat, 'bri' : bri}
                     result = b.set_light(light_ids_on, command)
                 else: # empty list
-                    command =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri}
+                    command =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : sat, 'bri' : bri}
                     result = b.set_light(light_ids_in_play, command)
 
             if args.verbose:
                 if len(light_ids_in_play) > 0:
-#                    print('Hue Bulb(s) ' + str(light_ids_in_play) + ' set to hue = ' + str(hue) + ', sat = ' + str(saturation) + ', bri = ' + str(bri))
-                    print('Bulb(s) {light_id} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri:>3}'.format(light_id=light_ids_in_play, hue=hue_verbose, sat=saturation, bri=bri))
+#                    print('Hue Bulb(s) ' + str(light_ids_in_play) + ' set to hue = ' + str(hue) + ', sat = ' + str(sat) + ', bri = ' + str(bri))
+                    print('Bulb(s) {light_id} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri:>3}'.format(light_id=light_ids_in_play, hue=hue_verbose, sat=sat, bri=bri))
                 print('-- pass complete, waiting ' + str(transitiontime / 10 + waittime) + ' seconds --')
                 if args.duration is not None:
                     print('-- ' + str(round(args.duration - clock()/60, 3)) + ' minutes remaining --')
@@ -205,17 +210,20 @@ def main():
         # Set bulbs to random colors; wait; repeat
         light_ids_on = []
         huenum = -1
+        brinum = -1
+        satnum = -1
         start = clock()
         while True:
             if args.duration is not None:
                 if args.duration < (clock() - start) / 60:
                         break
-            saturation = args.saturation # 0 to 254
-            if not args.ordered:
-                random.shuffle(light_ids_in_play)
+#            sat = args.saturation # 0 to 254
+            if args.ordered:
+                huenum = (huenum + 1) % len(args.hues)
+                brinum = (brinum + 1) % len(args.brightness)
+                satnum = (satnum + 1) % len(args.saturation)
             else:
-                huenum += 1
-                huenum = huenum % len(args.hues)
+                random.shuffle(light_ids_in_play)
             for light_index, light_id in enumerate(light_ids_in_play):
                 if args.ordered:
                     # Each bulb is assigned hues in the user-specified order.
@@ -223,11 +231,15 @@ def main():
                     # Visual note: the apparent "chase" direction of colors is the reverse 
                     # of the order of lights. 
                     hue = args.hues[(light_index + huenum) % len(args.hues)]
+                    bri = args.brightness[(light_index + brinum) % len(args.brightness)]
+                    sat = args.saturation[(light_index + satnum) % len(args.saturation)]
                 else:
                     hue = random.choice(args.hues)
+                    bri = random.choice(args.brightness)
+                    sat = random.choice(args.saturation)
                 hue_verbose = hue # used only for verbose printing
                 if hue == -1: # flag for white
-                    saturation = 0 # 0 to 254
+                    sat = 0 # 0 to 254
                     if len([i for i in args.hues if i >= 0]) > 0:
                         hue = random.choice([i for i in args.hues if i >= 0]) # choose from non-white/black values
                     else:
@@ -240,17 +252,17 @@ def main():
                 if hue_verbose != -2: # if not black
                     # Set bulbs
                     if light_id in light_ids_on:
-                        command =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri}
+                        command =  {'on' : True, 'transitiontime' : transitiontime, 'hue' : hue, 'sat' : sat, 'bri' : bri}
                         light_ids_on.remove(light_id)
                     else:
-                        command =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : saturation, 'bri' : bri}
+                        command =  {'transitiontime' : transitiontime, 'hue' : hue, 'sat' : sat, 'bri' : bri}
                 result = b.set_light(light_id, command)
 
                 if args.verbose:
                     if light_id in light_ids_in_play:
-                        print('Bulb {light_id:>2} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri:>3}'.format(light_id=light_id, hue=hue_verbose, sat=saturation, bri=bri))
+                        print('Bulb {light_id:>2} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri:>3}'.format(light_id=light_id, hue=hue_verbose, sat=sat, bri=bri))
 
-                saturation = args.saturation # 0 to 254
+                sat = args.saturation # 0 to 254
 
             if args.verbose:
                 print('-- pass complete, waiting ' + str(transitiontime / 10 + waittime) + ' seconds --')
