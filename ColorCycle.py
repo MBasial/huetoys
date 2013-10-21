@@ -193,7 +193,8 @@ def main():
                     print('Bulb(s) {light_id} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri:>3}'.format(light_id=light_ids_in_play, hue=hue_verbose, sat=sat, bri=bri))
                 print('-- pass complete, waiting ' + str(transitiontime / 10 + waittime) + ' seconds --')
                 if args.duration is not None:
-                    print('-- ' + str(round(args.duration - clock()/60, 3)) + ' minutes remaining --')
+                    time = clock()
+                    print('-- ' + str(int(args.duration - time/60)) + ' minutes ' + str(round((args.duration*60 - time) % 60, 1)) + ' seconds remaining --')
             if transitiontime + waittime == 0.0:
                 if args.verbose:
                     print('-- lights set, bpm = 0.0, exiting program --')
@@ -267,7 +268,8 @@ def main():
             if args.verbose:
                 print('-- pass complete, waiting ' + str(transitiontime / 10 + waittime) + ' seconds --')
                 if args.duration is not None:
-                    print('-- ' + str(round(args.duration - clock()/60, 3)) + ' minutes remaining --')
+                    time = clock()
+                    print('-- ' + str(int(args.duration - time/60)) + ' minutes ' + str(round((args.duration*60 - time) % 60, 1)) + ' seconds remaining --')
             if transitiontime + waittime == 0.0:
                 if args.verbose:
                     print('-- lights set, bpm = 0.0, exiting program --')
