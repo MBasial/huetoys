@@ -2,7 +2,7 @@ def main():
     import random as random
     random.seed()
     from time import sleep
-    from time import clock
+    from time import time
     from phue import Bridge
 
     # user-specific settings
@@ -146,10 +146,10 @@ def main():
         huenum = -1
         brinum = -1
         satnum = -1
-        start = clock()
+        start = time()
         while True:
             if args.duration is not None:
-                if args.duration < (clock() - start) / 60:
+                if args.duration < (time() - start) / 60:
                         break
             if args.ordered:
                 # This results in each bulb moving through the parameter list in order.
@@ -168,8 +168,6 @@ def main():
             if hue == -1: # flag for white
                 sat = 0 # 0 to 254
                 hue = random.choice([i for i in args.hues if i >= 0]) # choose from non-white values
-#            else:
-#                sat = random.choice(args.saturation) # 0 to 254
 
             if hue == -2: # flag for black (off)
                 # get light 'on' status and build a list of lights that are on; build fresh every time
@@ -194,8 +192,8 @@ def main():
                     print('Bulb(s) {light_id} set to hue = {hue:>5}, sat = {sat:>3}, bri = {bri:>3}'.format(light_id=light_ids_in_play, hue=hue_verbose, sat=sat, bri=bri))
                 print('-- pass complete, waiting ' + str(transitiontime / 10 + waittime) + ' seconds --')
                 if args.duration is not None:
-                    time = clock()
-                    print('-- ' + str(int(args.duration - time/60)) + ' minutes ' + str(round((args.duration*60 - time) % 60, 1)) + ' seconds remaining --')
+                    elapsed = time() - start
+                    print('-- ' + str(int(args.duration - elapsed/60)) + ' minutes ' + str(round((args.duration*60 - elapsed) % 60, 1)) + ' seconds remaining --')
             if transitiontime + waittime == 0.0:
                 if args.verbose:
                     print('-- lights set, bpm = 0.0, exiting program --')
@@ -214,10 +212,10 @@ def main():
         huenum = -1
         brinum = -1
         satnum = -1
-        start = clock()
+        start = time()
         while True:
             if args.duration is not None:
-                if args.duration < (clock() - start) / 60:
+                if args.duration < (time() - start) / 60:
                         break
 #            sat = args.saturation # 0 to 254
             if args.ordered:
@@ -269,8 +267,8 @@ def main():
             if args.verbose:
                 print('-- pass complete, waiting ' + str(transitiontime / 10 + waittime) + ' seconds --')
                 if args.duration is not None:
-                    time = clock()
-                    print('-- ' + str(int(args.duration - time/60)) + ' minutes ' + str(round((args.duration*60 - time) % 60, 1)) + ' seconds remaining --')
+                    elapsed = time() - start
+                    print('-- ' + str(int(args.duration - elapsed/60)) + ' minutes ' + str(round((args.duration*60 - elapsed) % 60, 1)) + ' seconds remaining --')
             if transitiontime + waittime == 0.0:
                 if args.verbose:
                     print('-- lights set, bpm = 0.0, exiting program --')
