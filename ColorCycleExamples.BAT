@@ -77,6 +77,8 @@ c:\python32\python ColorCycle.py -v -t 3 -w 120 -b 1 -c 0 5632 49955 60160 -i 6 
 REM Redshift
 title Redshift
 c:\python32\python ColorCycle.py -v -t 10 -b 254 250 245 240 -c 63000 63500 64000 64500 65000 65535 0 500 1000 1500 2000 -i 6 7 13 14 16 18  10 12 15 19 -d 120 -s 254 250 245 240 235
+title Redshift (whole house)
+c:\python32\python ColorCycle.py -v -t 10 -b 254 250 245 240 -c 63000 63500 64000 64500 65000 65535 0 500 1000 1500 2000 -i 6 7 13 14 16 18  10 12 15 19  1 2 3 4 8 9 11  17  20 21 -d 120 -s 254 250 245 240 235
 
 
 REM Debugging
