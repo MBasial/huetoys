@@ -56,6 +56,7 @@ def main():
     # TODO: add option to specify colors (and more?) as ranges, e.g. hues = [0-1000, 5000-6800, 40000-41000] would assign three colors chosen from those ranges
     # TODO: add an option that increases hue/brightness/etc. by an increment of X for each time Y -- this is a maybe
     # TODO: set up a series of testing comand lines (e.g. 0, 1, 5 bulbs, 0, 1, 5 colors, bad parameter values)
+    # TODO: add a switch to turn lights off at the end of the duration (don't think it can happen any other time . .  .)
     
     args = parser.parse_args()
     if args.verbose:
@@ -147,6 +148,7 @@ def main():
         satnum = -1
         start = time()
         while True:
+            loopstart = time()
             if args.duration is not None:
                 if args.duration < (time() - start) / 60:
                         break
@@ -198,7 +200,8 @@ def main():
                     print('-- lights set, bpm = 0.0, exiting program --')
                 break # end program
             else:
-                sleep(transitiontime / 10 + waittime)
+                loopelapsed = time() - loopstart
+                sleep(transitiontime / 10 + waittime - loopelapsed)
 
             if len(args.hues) == 1:
                 if args.verbose:
@@ -213,6 +216,7 @@ def main():
         satnum = -1
         start = time()
         while True:
+            loopstart = time()
             if args.duration is not None:
                 if args.duration < (time() - start) / 60:
                         break
@@ -273,7 +277,8 @@ def main():
                     print('-- lights set, bpm = 0.0, exiting program --')
                 break # end program
             else:
-                sleep(transitiontime / 10 + waittime)
+                loopelapsed = time() - loopstart
+                sleep(transitiontime / 10 + waittime - loopelapsed)
 
     # debug
 #    import pdb
