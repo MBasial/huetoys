@@ -44,6 +44,8 @@ def main():
     parser.add_argument('-i', '--ids', help='A list of bulb id values to cycle through; bulbs will be turned on', type=int, nargs='+')
     parser.add_argument('-d', '--duration', help='Duration for which the pattern should repeat (minutes)', type=float) #, default = 0.0)
     parser.add_argument('-v', '--verbose', help='Increase output verbosity', action="store_true")
+    parser.add_argument('-x', '--exit', help='Exit by turning bulbs off', action="store_true")
+
     # TODO: add option to specify bulb names
     # TODO: add option to specify lights by name wildcard, e.g. 'Office*' or 'Office' implying '*Office*' or '*office*'
     # TODO: add option to print list of bulb name/ID combos (with additional option to sort by ID# or name? -d, -di, -dn for 'directory, by id, by name'?)
@@ -56,7 +58,6 @@ def main():
     # TODO: add option to specify colors (and more?) as ranges, e.g. hues = [0-1000, 5000-6800, 40000-41000] would assign three colors chosen from those ranges
     # TODO: add an option that increases hue/brightness/etc. by an increment of X for each time Y -- this is a maybe
     # TODO: set up a series of testing comand lines (e.g. 0, 1, 5 bulbs, 0, 1, 5 colors, bad parameter values)
-    # TODO: add a switch to turn lights off at the end of the duration (don't think it can happen any other time . .  .)
     
     args = parser.parse_args()
     if args.verbose:
@@ -194,7 +195,7 @@ def main():
                 print('-- pass complete, waiting ' + str(transitiontime / 10 + waittime) + ' seconds --')
                 if args.duration is not None:
                     elapsed = time() - start
-                    print('-- ' + str(int(args.duration - elapsed/60)) + ' minutes ' + str(round((args.duration*60 - elapsed) % 60, 1)) + ' seconds remaining --')
+                    print('-- ' + str(int(args.duration - elapsed/60)) + ' minutes ' + str(round(max((args.duration*60 - elapsed), 0) % 60, 1)) + ' seconds remaining --')
             if transitiontime + waittime == 0.0:
                 if args.verbose:
                     print('-- lights set, bpm = 0.0, exiting program --')
@@ -271,7 +272,10 @@ def main():
                 print('-- pass complete, waiting ' + str(transitiontime / 10 + waittime) + ' seconds --')
                 if args.duration is not None:
                     elapsed = time() - start
-                    print('-- ' + str(int(args.duration - elapsed/60)) + ' minutes ' + str(round((args.duration*60 - elapsed) % 60, 1)) + ' seconds remaining --')
+                    # the following command could use some analysis for the max portion.
+                    # the following command, with max removed, will result in an incorrect "59.9 seconds remaining" message at the end
+                    # c:\python32\python ColorCycle.py -v -t 3.0 -b 1 -c 0 500 1000 1500 2000 63000 63500 64000 64500 65000 65535 -i10 12 15 19 -d 0.2 -s 254 250 245 240 -x
+                    print('-- ' + str(int(args.duration - elapsed/60)) + ' minutes ' + str(round(max((args.duration*60 - elapsed), 0) % 60, 1)) + ' seconds remaining --')
             if transitiontime + waittime == 0.0:
                 if args.verbose:
                     print('-- lights set, bpm = 0.0, exiting program --')
@@ -279,6 +283,9 @@ def main():
             else:
                 loopelapsed = time() - loopstart
                 sleep(transitiontime / 10 + waittime - loopelapsed)
+        if args.exit:
+            command =  {'transitiontime' : transitiontime, 'on' : False}
+            result = b.set_light(light_ids_in_play, command)
 
     # debug
 #    import pdb
