@@ -202,9 +202,9 @@ def main():
                 break # end program
             else:
                 loopelapsed = time() - loopstart
-                sleep(transitiontime / 10 + waittime - loopelapsed)
+                sleep(max(transitiontime / 10 + waittime - loopelapsed, 0))
 
-            if len(args.hues) == 1:
+            if len(args.hues) == 1 and len(args.brightness) == 1 and len(args.saturation) == 1:
                 if args.verbose:
                     print('-- only one color to cycle, exiting program --')
                 # only one color, no reason to keep changing it
@@ -282,10 +282,11 @@ def main():
                 break # end program
             else:
                 loopelapsed = time() - loopstart
-                sleep(transitiontime / 10 + waittime - loopelapsed)
+                sleep(max(transitiontime / 10 + waittime - loopelapsed, 0))
         if args.exit:
             command =  {'transitiontime' : transitiontime, 'on' : False}
             result = b.set_light(light_ids_in_play, command)
+            print('-- lights off, exiting program --')
 
     # debug
 #    import pdb
