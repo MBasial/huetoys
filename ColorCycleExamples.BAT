@@ -11,11 +11,13 @@ REM red = 65535
 REM white = -1
 REM black (off) = -2
 
+REM Front Porch = 5
 REM Office = 10 12 15 19
 REM Bedroom = 6 7 13 14 16 18
 REM Living Room and Entryway = 1 2 3 4 8 9 11
-REM Tina`s Room = 17
-REM Everything Except Front Porch = 6 7 13 14 16 18  10 12 15 19  1 2 3 4 8 9 11  17  20 21
+REM Tina`s Room and Bathroom = 17 25
+REM Hallway = 22 23 24
+REM Everything Except Front Porch = 6 7 13 14 16 18  10 12 15 19  1 2 3 4 8 9 11  17 25  20 21  22 23 24
 
 REM This batch file is not actually intended to be run as a whole.
 REM It is really just a convenient spot for collecting ColorCycle command lines.
@@ -78,7 +80,7 @@ REM Redshift
 title Redshift
 c:\python32\python ColorCycle.py -v -t 10 -b 254 250 245 240 -c 63000 63500 64000 64500 65000 65535 0 500 1000 1500 2000 -i 6 7 13 14 16 18  10 12 15 19 -d 120 -s 254 250 245 240 235
 title Redshift (whole house)
-c:\python32\python ColorCycle.py -v -t 10 -b 254 250 245 240 -c 63000 63500 64000 64500 65000 65535 0 500 1000 1500 2000 -i 6 7 13 14 16 18  10 12 15 19  1 2 3 4 8 9 11  17  20 21 -d 240 -s 254 250 245 240 235 -x
+c:\python32\python ColorCycle.py -v -t 10 -b 254 250 245 240 -c 63000 63500 64000 64500 65000 65535 0 500 1000 1500 2000 -i 6 7 13 14 16 18  10 12 15 19  1 2 3 4 8 9 11  17 25  20 21  22 23 24 -d 240 -s 254 250 245 240 235 -x
 
 c:\python32\python ColorCycle.py -v -t 20 -b 254 -c 15104 46920 -1 -1 -i 6 7 13 14 16 18 -d 60 -s 254 250 245 240 235 -x
 
@@ -88,6 +90,9 @@ c:\python32\python ColorCycle.py -v -t 0.1 -w 3 -c 0 5632 25500 -m -i 6 7 13 14 
 REM Thanksgiving
 title Thanksgiving
 c:\python32\python ColorCycle.py -v -t 10 -b 254 230 210 190 -c 0 5632 15104 -i 6 7 13 14 16 18  10 12 15 19  1 2 3 4 8 9 11  17  20 21 5 -s 254 250 245 240 235
+
+REM Splash of blue, but mostly red.
+c:\python32\python ColorCycle.py -v -t 3 -w 10 -b 0 -c 47883 63500 64000 64500 65000 65535 0 500 1000 1500 2000 -i 6 7 13 14 16 18  10 12 15 19 -d 120 -s 254 -x
 
 REM Debugging
 c:\python32\python ColorCycle.py -v -t 3 -b 254 250 240 230 220 210 -c 5632 15104 40000 -i 10 12 15 19 -d 0.25 -s 254 200 150 100 -o
