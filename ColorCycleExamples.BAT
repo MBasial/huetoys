@@ -93,6 +93,7 @@ c:\python32\python ColorCycle.py -v -t 10 -b 254 230 210 190 -c 0 5632 15104 -i 
 
 REM Splash of blue, but mostly red.
 c:\python32\python ColorCycle.py -v -t 3 -w 10 -b 0 -c 47883 63500 64000 64500 65000 65535 0 500 1000 1500 2000 -i 6 7 13 14 16 18  10 12 15 19 -d 120 -s 254 -x
+c:\python32\python ColorCycle.py -v -t 0.1 -w 1.9 -b 254 -c 47883 63500 64000 64500 65000 65535 0 500 1000 1500 2000 -nx F Li ti -d 120 -s 254
 
 REM Debugging
 c:\python32\python ColorCycle.py -v -t 3 -b 254 250 240 230 220 210 -c 5632 15104 40000 -i 10 12 15 19 -d 0.25 -s 254 200 150 100 -o

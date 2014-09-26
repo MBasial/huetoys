@@ -8,6 +8,7 @@ def main():
     from phue import Bridge
 #    b = Bridge()
     b = Bridge('192.168.1.110')
+#    b.connect()
 
     # command-line argument parser
     import argparse
