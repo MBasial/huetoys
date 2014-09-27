@@ -309,7 +309,7 @@ def main():
                         loopelapsed = time() - loopstart
                         elapsed = time() - start
                         len_text = underwrite('-- ' + str(int(args.duration - elapsed/60)) + ' minutes ' + str(round(max((args.duration*60 - elapsed), 0) % 60, 1)) + ' seconds remaining --', len_text)
-                        sleep(min(1, transitiontime / 10 + waittime - loopelapsed))
+                        sleep(min(1, max(0, transitiontime / 10 + waittime - loopelapsed)))
             if args.exit:
                 command =  {'transitiontime' : transitiontime, 'on' : False}
                 result = b.set_light(light_ids_in_play, command)
