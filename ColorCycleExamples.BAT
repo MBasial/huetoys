@@ -95,6 +95,22 @@ REM Splash of blue, but mostly red.
 c:\python32\python ColorCycle.py -v -t 3 -w 10 -b 0 -c 47883 63500 64000 64500 65000 65535 0 500 1000 1500 2000 -i 6 7 13 14 16 18  10 12 15 19 -d 120 -s 254 -x
 c:\python32\python ColorCycle.py -v -t 0.1 -w 1.9 -b 254 -c 47883 63500 64000 64500 65000 65535 0 500 1000 1500 2000 -nx F Li ti -d 120 -s 254
 
+REM Surise simulator
+python3 ColorCycle.py -v -t 0.0 -b 0 -c 47883 63500 64000 64500 65000 65535 0 500 1000 1500 2000 -n Bedroom -d 1 -s 254 -x
+
+REM red = 0
+REM orange = 5632
+REM yellow = 15104
+REM green = 25500
+REM blue = 46920
+REM indigo = 47883
+REM purple = 49955
+REM magenta = 60160
+REM red = 65535
+REM white = -1
+REM black (off) = -2
+
+
 REM Debugging
 c:\python32\python ColorCycle.py -v -t 3 -b 254 250 240 230 220 210 -c 5632 15104 40000 -i 10 12 15 19 -d 0.25 -s 254 200 150 100 -o
 :end
